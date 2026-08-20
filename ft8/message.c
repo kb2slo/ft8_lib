@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-#include "../common/stpcpy_compat.h"
 
 #define LOG_LEVEL LOG_WARN
 #include "debug.h"
