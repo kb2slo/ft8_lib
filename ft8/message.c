@@ -812,11 +812,19 @@ ftx_message_rc_t ftx_message_decode_dxpedition(
     return FTX_MESSAGE_RC_OK;
 }
 
+// field1 must also hold a bracketed 11-character callsign hash ("<...........>")
+// or a 13-character free-text rendering: 14 bytes each including the NUL.
+_Static_assert(FTX_TELEMETRY_HEX_LENGTH + 1 >= 14, "field1_buf too small for callsign/free-text fields");
+
 ftx_message_rc_t ftx_message_decode(const ftx_message_t* msg, ftx_callsign_hash_interface_t* hash_if, char* message, ftx_message_offsets_t* offsets)
 {
     ftx_message_rc_t rc;
 
-    char field1_buf[16];
+    // field1 holds the longest single-field rendering, which is telemetry: two
+    // hex characters per payload byte plus a NUL. Derive it from the renderer
+    // rather than restating a literal -- sizing this by hand is what overflowed
+    // it (18 characters plus NUL into 16 bytes).
+    char field1_buf[FTX_TELEMETRY_HEX_LENGTH + 1];
     char field2_buf[16];
     char field3_buf[48];
     char* field1 = field1_buf;
@@ -1038,12 +1046,12 @@ void ftx_message_decode_free(const ftx_message_t* msg, char* text)
 
 void ftx_message_decode_telemetry_hex(const ftx_message_t* msg, char* telemetry_hex)
 {
-    uint8_t b71[9];
+    uint8_t b71[FTX_TELEMETRY_LENGTH_BYTES];
 
     ftx_message_decode_telemetry(msg, b71);
 
     // Convert b71 to hexadecimal string
-    for (int i = 0; i < 9; ++i)
+    for (int i = 0; i < FTX_TELEMETRY_LENGTH_BYTES; ++i)
     {
         uint8_t nibble1 = (b71[i] >> 4);
         uint8_t nibble2 = (b71[i] & 0x0Fu);
@@ -1053,7 +1061,7 @@ void ftx_message_decode_telemetry_hex(const ftx_message_t* msg, char* telemetry_
         telemetry_hex[i * 2 + 1] = c2;
     }
 
-    telemetry_hex[18] = '\0';
+    telemetry_hex[FTX_TELEMETRY_HEX_LENGTH] = '\0';
 }
 
 void ftx_message_decode_telemetry(const ftx_message_t* msg, uint8_t* telemetry)

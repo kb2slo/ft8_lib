@@ -10,6 +10,8 @@ extern "C"
 #endif
 
 #define FTX_PAYLOAD_LENGTH_BYTES 10 ///< number of bytes to hold 77 bits of FTx payload data
+#define FTX_TELEMETRY_LENGTH_BYTES 9 ///< number of bytes to hold 71 bits of right-aligned telemetry data
+#define FTX_TELEMETRY_HEX_LENGTH (FTX_TELEMETRY_LENGTH_BYTES * 2) ///< telemetry rendered as hex, excluding the terminating NUL
 #define FTX_MAX_MESSAGE_LENGTH   64 ///< max decoded message length including multi-part messages such as DXpedition type 0.1
 #define FTX_MAX_MESSAGE_FIELDS   3  // may need to get longer for multi-part messages (DXpedition, contest etc.)
 
