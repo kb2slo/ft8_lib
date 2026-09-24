@@ -29,7 +29,16 @@ typedef struct
 #define WF_ELEM_T          uint8_t
 #define WF_ELEM_MAG(x)     ((float)(x)*0.5f - 120.0f)
 #define WF_ELEM_MAG_INT(x) (int)(x)
-#define SUB_WF_ELEM_MAG(x, y) do {(x) -= y * 2 + 240; } while(0)
+// Subtract a decoded signal's SNR (y, in dB) from its tone bin (x). The uint8 scale is 0.5 dB per
+// step, so a dB *difference* is 2*y steps; the +240 offset in WF_ELEM_MAG_INT belongs only to
+// absolute levels. The previous form, (x) -= y * 2 + 240, always went negative, and converting a
+// negative float to uint8_t is undefined behaviour: x86-64 and arm64 builds ended up with
+// x - 2*y + 16 (wrapping mod 256), while RISC-V saturates to 0. The +16 (8 dB) keeps the partial
+// subtraction the x86-64/arm64 results were tuned with; the clamp replaces the wrap.
+#define SUB_WF_ELEM_MAG(x, y) do { \
+        int _v = (int)(x) - (int)(2.0f * (y) + 0.5f) + 16; \
+        (x) = (uint8_t)(_v < 0 ? 0 : (_v > 255 ? 255 : _v)); \
+    } while (0)
 #endif
 
 /// Output structure of ftx_find_sync() and input structure of ftx_decode().
