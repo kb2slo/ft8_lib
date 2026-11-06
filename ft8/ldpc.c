@@ -127,7 +127,7 @@ static int ldpc_check(uint8_t codeword[])
     return errors;
 }
 
-void bp_decode(float codeword[], int max_iters, uint8_t plain[], int* ok)
+int bp_decode(float codeword[], int max_iters, uint8_t plain[], int* ok)
 {
     float tov[FTX_LDPC_N][3];
     float toc[FTX_LDPC_M][7];
@@ -140,7 +140,8 @@ void bp_decode(float codeword[], int max_iters, uint8_t plain[], int* ok)
         tov[n][0] = tov[n][1] = tov[n][2] = 0;
     }
 
-    for (int iter = 0; iter < max_iters; ++iter)
+    int iter;
+    for (iter = 0; iter < max_iters; ++iter)
     {
         // Do a hard decision guess (tov=0 in iter 0)
         int plain_sum = 0;
@@ -210,6 +211,7 @@ void bp_decode(float codeword[], int max_iters, uint8_t plain[], int* ok)
     }
 
     *ok = min_errors;
+    return iter;
 }
 
 // Ideas for approximating tanh/atanh:

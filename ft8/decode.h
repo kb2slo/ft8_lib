@@ -65,6 +65,7 @@ typedef struct
     float freq;
     float time;
     int ldpc_errors;         ///< Number of LDPC errors during decoding
+    int ldpc_iterations;     ///< Number of LDPC iterations run
     uint16_t crc_extracted;  ///< CRC value recovered from the message
     uint16_t crc_calculated; ///< CRC value calculated over the payload
     // int unpack_status;       ///< Return value of the unpack routine
